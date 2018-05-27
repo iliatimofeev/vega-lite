@@ -34,8 +34,7 @@ export namespace ScaleType {
 export type ScaleType = typeof ScaleType.LINEAR | typeof ScaleType.BIN_LINEAR |
   typeof ScaleType.LOG | typeof ScaleType.POW | typeof ScaleType.SQRT |
   typeof ScaleType.TIME | typeof ScaleType.UTC |
-  // TODO: add 'quantize', 'quantile', 'threshold' back when we really support them
-  typeof ScaleType.SEQUENTIAL | // typeof ScaleType.QUANTILE | typeof ScaleType.QUANTIZE | typeof ScaleType.THRESHOLD |
+  typeof ScaleType.SEQUENTIAL | typeof ScaleType.QUANTILE | typeof ScaleType.QUANTIZE | typeof ScaleType.THRESHOLD |
   typeof ScaleType.ORDINAL | typeof ScaleType.BIN_ORDINAL | typeof ScaleType.POINT | typeof ScaleType.BAND;
 
 
@@ -51,6 +50,9 @@ const SCALE_CATEGORY_INDEX: {
   log: 'numeric',
   pow: 'numeric',
   sqrt: 'numeric',
+  quantize: 'numeric',
+  quantile: 'numeric',
+  threshold: 'numeric',
   'bin-linear': 'bin-linear', // TODO: should bin-linear support merging with other
   time: 'time',
   utc: 'time',
@@ -601,7 +603,6 @@ export function scaleTypeSupportProperty(scaleType: ScaleType, propName: keyof S
     case 'scheme':
       return contains(['sequential', 'ordinal', 'bin-ordinal', 'quantile', 'quantize'], scaleType);
     case 'interpolate':
-      // FIXME(https://github.com/vega/vega-lite/issues/2902) how about ordinal?
       return contains(['linear', 'bin-linear', 'pow', 'log', 'sqrt', 'utc', 'time'], scaleType);
     case 'round':
       return isContinuousToContinuous(scaleType) || scaleType === 'band' || scaleType === 'point';
