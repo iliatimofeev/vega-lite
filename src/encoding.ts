@@ -214,6 +214,7 @@ export function extractTransformsFromEncoding(oldEncoding: Encoding<string>, con
         type: channelDef.type,
         title: title(channelDef, config),
       };
+      // Extract potential embedded transformations along with remaining properties
       const {field, aggregate: aggOp, timeUnit, bin, ...remaining} = channelDef;
       if (aggOp && isAggregateOp(aggOp)) {
         aggregate.push({

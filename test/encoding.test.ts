@@ -90,6 +90,22 @@ describe('encoding', () => {
         }
       });
     });
+    it('should extract binning from encoding', () => {
+      const output = extractTransformsFromEncoding(normalizeEncoding({
+        x: {field: 'a', type: 'ordinal', bin: true},
+        y: {type: 'quantitative', aggregate: 'count'}
+      }, 'bar'), defaultConfig);
+      assert.deepEqual(output, {
+        bins: [{bin: {maxbins: 10}, field: 'a', as: 'bin_maxbins_10_a'}],
+        timeUnits: [],
+        aggregate: [{op: 'count', field: undefined, as: 'count_*'}],
+        groupby: ['bin_maxbins_10_a'],
+        encoding: {
+          x: {field: 'bin_maxbins_10_a', type: 'ordinal', title: 'a (binned)'},
+          y: {field: 'count_*', type: 'quantitative', title: 'Number of Records'}
+        }
+      });
+    });
     it('should preserve auxiliary properties (i.e. axis) in encoding', () => {
       const output = extractTransformsFromEncoding(normalizeEncoding({
         x: {field: 'a', type: 'quantitative'},
