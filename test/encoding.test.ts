@@ -99,7 +99,7 @@ describe('encoding', () => {
         bins: [{bin: {maxbins: 10}, field: 'a', as: 'bin_maxbins_10_a'}],
         timeUnits: [],
         aggregate: [{op: 'count', field: undefined, as: 'count_*'}],
-        groupby: ['bin_maxbins_10_a'],
+        groupby: ['bin_maxbins_10_a_end', 'bin_maxbins_10_a_range', 'bin_maxbins_10_a'],
         encoding: {
           x: {field: 'bin_maxbins_10_a', type: 'ordinal', title: 'a (binned)'},
           y: {field: 'count_*', type: 'quantitative', title: 'Number of Records'}

@@ -1,6 +1,7 @@
 import {isArray} from 'vega-util';
 import {isAggregateOp} from './aggregate';
 import {Channel, CHANNELS, isChannel, supportMark} from './channel';
+import {binRequiresRange} from './compile/common';
 import {Config} from './config';
 import {FacetMapping} from './facet';
 import {
@@ -223,10 +224,13 @@ export function extractTransformsFromEncoding(oldEncoding: Encoding<string>, con
           as: channelDelta.field
         });
       } else if(bin) {
-        // TODO(@alanbanh): make bin correct
         bins.push({bin, field, as: channelDelta.field});
+        // Add additional groupbys for range and end of bins
+        groupby.push(vgField(channelDef, {binSuffix: 'end'}));
+        if (binRequiresRange(channelDef, channel)) {
+          groupby.push(vgField(channelDef, {binSuffix: 'range'}));
+        }
         channelDelta.type = Type.ORDINAL;
-        // TODO: Continue this branch of code, currently incomplete.
       } else if(timeUnit) {
         timeUnits.push({timeUnit, field, as: channelDelta.field});
         channelDelta['axis'] = {
