@@ -1,5 +1,4 @@
 import {isArray} from 'vega-util';
-
 import {isAggregateOp} from './aggregate';
 import {Channel, CHANNELS, isChannel, supportMark} from './channel';
 import {Config} from './config';
@@ -27,9 +26,10 @@ import {
 } from './fielddef';
 import * as log from './log';
 import {Mark} from './mark';
+import {getDateTimeComponents} from './timeunit';
 import {AggregatedFieldDef, BinTransform, TimeUnitTransform} from './transform';
 import {Type} from './type';
-import {contains, keys, some} from './util';
+import {contains, keys, mergeDeep, some} from './util';
 
 
 export interface Encoding<F> {
@@ -208,33 +208,35 @@ export function extractTransformsFromEncoding(oldEncoding: Encoding<string>, con
 
   forEach(oldEncoding, (channelDef, channel) => {
     if (isFieldDef(channelDef)) {
-      const transformedField = vgField(channelDef);
-      if (channelDef.aggregate && isAggregateOp(channelDef.aggregate)) {
-        aggregate.push({
-          op: channelDef.aggregate,
-          field: channelDef.field,
-          as: transformedField
-        });
-      } else {
-        // Add bin or timeUnit transform if applicable
-        const bin = channelDef.bin;
-        if (bin) {
-          const {field} = channelDef;
-          bins.push({bin, field, as: transformedField});
-        } else if (channelDef.timeUnit) {
-          const {timeUnit, field} = channelDef;
-          timeUnits.push({timeUnit, field, as: transformedField});
-        }
-
-        // TODO(@alanbanh): make bin correct
-        groupby.push(transformedField);
-      }
-      // now the field should refer to post-transformed field instead
-      encoding[channel] = {
+      // Changes to be applied to current channel after extracting transformations
+      const channelDelta = {
         field: vgField(channelDef),
         type: channelDef.type,
-        title: title(channelDef, config)
+        title: title(channelDef, config),
       };
+      const {field, aggregate: aggOp, timeUnit, bin, ...remaining} = channelDef;
+      if (aggOp && isAggregateOp(aggOp)) {
+        aggregate.push({
+          op: aggOp,
+          field,
+          as: channelDelta.field
+        });
+      } else if(bin) {
+        // TODO(@alanbanh): make bin correct
+        bins.push({bin, field, as: channelDelta.field});
+        channelDelta.type = Type.ORDINAL;
+        // TODO: Continue this branch of code, currently incomplete.
+      } else if(timeUnit) {
+        timeUnits.push({timeUnit, field, as: channelDelta.field});
+        channelDelta['axis'] = {
+          format: getDateTimeComponents(timeUnit, config.axis.shortTimeLabels).join(' '),
+        };
+      }
+      if(!aggOp) {
+        groupby.push(channelDelta.field);
+      }
+      // now the field should refer to post-transformed field instead
+      encoding[channel] = mergeDeep(remaining, channelDelta);
     } else {
       // For value def, just copy
       encoding[channel] = oldEncoding[channel];
