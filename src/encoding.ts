@@ -28,7 +28,6 @@ import {
 import * as log from './log';
 import {Mark} from './mark';
 import {getDateTimeComponents} from './timeunit';
-import {Padding} from './toplevelprops';
 import {AggregatedFieldDef, BinTransform, TimeUnitTransform} from './transform';
 import {Type} from './type';
 import {contains, keys, mergeDeep, some} from './util';
@@ -246,6 +245,8 @@ export function extractTransformsFromEncoding(oldEncoding: Encoding<string>, con
         channelDelta.type = Type.QUANTITATIVE;
       } else if(timeUnit) {
         timeUnits.push({timeUnit, field, as: channelDelta.field});
+
+        // Add formatting to appropriate property based on the type of channel we're processing
         const format = getDateTimeComponents(timeUnit, config.axis.shortTimeLabels).join(' ');
         if(isNonPositionScaleChannel(channel)) {
           channelDelta['legend'] = {format};
