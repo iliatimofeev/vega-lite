@@ -28,6 +28,7 @@ import {
 import * as log from './log';
 import {Mark} from './mark';
 import {getDateTimeComponents} from './timeunit';
+import {Padding} from './toplevelprops';
 import {AggregatedFieldDef, BinTransform, TimeUnitTransform} from './transform';
 import {Type} from './type';
 import {contains, keys, mergeDeep, some} from './util';
@@ -218,11 +219,14 @@ export function extractTransformsFromEncoding(oldEncoding: Encoding<string>, con
       // Extract potential embedded transformations along with remaining properties
       const {field, aggregate: aggOp, timeUnit, bin, ...remaining} = channelDef;
       if (aggOp && isAggregateOp(aggOp)) {
-        aggregate.push({
+        const aggregateEntry: AggregatedFieldDef = {
           op: aggOp,
-          field,
           as: channelDelta.field
-        });
+        };
+        if(field) {
+          aggregateEntry.field = field;
+        }
+        aggregate.push(aggregateEntry);
       } else if(bin) {
         bins.push({bin, field, as: channelDelta.field});
         // Add additional groupbys for range and end of bins
@@ -230,7 +234,15 @@ export function extractTransformsFromEncoding(oldEncoding: Encoding<string>, con
         if (binRequiresRange(channelDef, channel)) {
           groupby.push(vgField(channelDef, {binSuffix: 'range'}));
         }
-        channelDelta.type = Type.ORDINAL;
+        // Create accompanying 'x2' or 'y2' field if channel is 'x' or 'y' respectively
+        if(channel === 'x' || channel === 'y') {
+          const secondaryChannel: FieldDef<string> = {
+              field: channelDelta.field + '_end',
+              type: Type.QUANTITATIVE,
+          };
+          encoding[channel + '2'] = secondaryChannel;
+        }
+        channelDelta.type = Type.QUANTITATIVE;
       } else if(timeUnit) {
         timeUnits.push({timeUnit, field, as: channelDelta.field});
         channelDelta['axis'] = {
