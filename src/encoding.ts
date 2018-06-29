@@ -1,6 +1,6 @@
 import {isArray} from 'vega-util';
 import {isAggregateOp} from './aggregate';
-import {Channel, CHANNELS, isChannel, supportMark} from './channel';
+import {Channel, CHANNELS, isChannel, isNonPositionScaleChannel, supportMark} from './channel';
 import {binRequiresRange} from './compile/common';
 import {Config} from './config';
 import {FacetMapping} from './facet';
@@ -218,6 +218,7 @@ export function extractTransformsFromEncoding(oldEncoding: Encoding<string>, con
       };
       // Extract potential embedded transformations along with remaining properties
       const {field, aggregate: aggOp, timeUnit, bin, ...remaining} = channelDef;
+      const isPositionChannel: boolean = channel === Channel.X || channel === Channel.Y;
       if (aggOp && isAggregateOp(aggOp)) {
         const aggregateEntry: AggregatedFieldDef = {
           op: aggOp,
@@ -235,7 +236,7 @@ export function extractTransformsFromEncoding(oldEncoding: Encoding<string>, con
           groupby.push(vgField(channelDef, {binSuffix: 'range'}));
         }
         // Create accompanying 'x2' or 'y2' field if channel is 'x' or 'y' respectively
-        if(channel === 'x' || channel === 'y') {
+        if(isPositionChannel) {
           const secondaryChannel: FieldDef<string> = {
               field: channelDelta.field + '_end',
               type: Type.QUANTITATIVE,
@@ -245,9 +246,14 @@ export function extractTransformsFromEncoding(oldEncoding: Encoding<string>, con
         channelDelta.type = Type.QUANTITATIVE;
       } else if(timeUnit) {
         timeUnits.push({timeUnit, field, as: channelDelta.field});
-        channelDelta['axis'] = {
-          format: getDateTimeComponents(timeUnit, config.axis.shortTimeLabels).join(' '),
-        };
+        const format = getDateTimeComponents(timeUnit, config.axis.shortTimeLabels).join(' ');
+        if(isNonPositionScaleChannel(channel)) {
+          channelDelta['legend'] = {format};
+        } else if(isPositionChannel) {
+          channelDelta['axis'] = {format};
+        } else if(channel === 'text' || channel === 'tooltip') {
+          channelDelta['format'] = format;
+        }
       }
       if(!aggOp) {
         groupby.push(channelDelta.field);
