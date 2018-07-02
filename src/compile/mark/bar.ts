@@ -36,6 +36,7 @@ function x(model: UnitModel): VgEncodeEntry {
   const xScaleName = model.scaleName(X);
   const xScale = model.getScaleComponent(X);
   // x, x2, and width -- we must specify two of these in all conditions
+<<<<<<< HEAD
   if (orient === 'horizontal' || x2Def) {
     if (isFieldDef(xDef) && isFieldDef(x2Def) && isBinned(xDef.bin)) {
       return mixins.binnedPosition(
@@ -44,6 +45,24 @@ function x(model: UnitModel): VgEncodeEntry {
         xScale.get('reverse')
       );
     }
+||||||| merged common ancestors
+  if (orient === 'horizontal' || x2Def) {
+    if (isFieldDef(xDef) && isFieldDef(x2Def) && isExternalBin(xDef.bin)) {
+      return mixins.binnedPosition(
+        xDef, x2Def, X, xScaleName,
+        markDef.binSpacing === undefined ? config.bar.binSpacing : markDef.binSpacing,
+        xScale.get('reverse')
+      );
+    }
+=======
+  if (isFieldDef(xDef) && isBinned(xDef.bin)) {
+    return mixins.binPosition(
+      xDef, x2Def, X, xScaleName,
+      markDef.binSpacing === undefined ? config.bar.binSpacing : markDef.binSpacing,
+      xScale.get('reverse')
+    );
+  } else if (orient === 'horizontal' || x2Def) {
+>>>>>>> sh/binned
     return {
       ...mixins.pointPosition('x', model, 'zeroOrMin'),
       ...mixins.pointPosition2(model, 'zeroOrMin', 'x2'),
@@ -51,8 +70,16 @@ function x(model: UnitModel): VgEncodeEntry {
   } else { // vertical
     if (isFieldDef(xDef)) {
       const xScaleType = xScale.get('type');
+<<<<<<< HEAD
       if (isBinning(xDef.bin) && !sizeDef && !hasDiscreteDomain(xScaleType)) {
         return mixins.binnedPosition(
+||||||| merged common ancestors
+      if (isInternalBin(xDef.bin) && !sizeDef && !hasDiscreteDomain(xScaleType)) {
+        return mixins.binnedPosition(
+=======
+      if (isBinning(xDef.bin) && !sizeDef && !hasDiscreteDomain(xScaleType)) {
+        return mixins.binPosition(
+>>>>>>> sh/binned
           xDef, undefined, X, model.scaleName('x'), markDef.binSpacing === undefined ? config.bar.binSpacing : markDef.binSpacing,
           xScale.get('reverse')
         );
@@ -82,14 +109,23 @@ function y(model: UnitModel) {
   const yScale = model.getScaleComponent(Y);
 
   // y, y2 & height -- we must specify two of these in all conditions
+<<<<<<< HEAD
   if (orient === 'vertical' || y2Def) {
     if (isFieldDef(yDef) && isFieldDef(y2Def) && isBinned(yDef.bin)) {
       return mixins.binnedPosition(
+||||||| merged common ancestors
+  if (orient === 'vertical' || y2Def) {
+    if (isFieldDef(yDef) && isFieldDef(y2Def) && isExternalBin(yDef.bin)) {
+      return mixins.binnedPosition(
+=======
+  if (isFieldDef(yDef) && isBinned(yDef.bin)) {
+      return mixins.binPosition(
+>>>>>>> sh/binned
         yDef, y2Def, Y, yScaleName,
         markDef.binSpacing === undefined ? config.bar.binSpacing : markDef.binSpacing,
         yScale.get('reverse')
       );
-    }
+  } else if (orient === 'vertical' || y2Def) {
     return {
       ...mixins.pointPosition('y', model, 'zeroOrMin'),
       ...mixins.pointPosition2(model, 'zeroOrMin', 'y2'),
@@ -97,8 +133,16 @@ function y(model: UnitModel) {
   } else {
     if (isFieldDef(yDef)) {
       const yScaleType = yScale.get('type');
+<<<<<<< HEAD
       if (isBinning(yDef.bin) && !sizeDef && !hasDiscreteDomain(yScaleType)) {
         return mixins.binnedPosition(
+||||||| merged common ancestors
+      if (isInternalBin(yDef.bin) && !sizeDef && !hasDiscreteDomain(yScaleType)) {
+        return mixins.binnedPosition(
+=======
+      if (isBinning(yDef.bin) && !sizeDef && !hasDiscreteDomain(yScaleType)) {
+        return mixins.binPosition(
+>>>>>>> sh/binned
           yDef, undefined, Y, model.scaleName('y'),
           markDef.binSpacing === undefined ? config.bar.binSpacing : markDef.binSpacing,
           yScale.get('reverse')
